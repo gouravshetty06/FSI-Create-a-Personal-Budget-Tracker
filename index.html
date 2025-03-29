@@ -1,44 +1,150 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>Personal Budget Calculator</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
-        integrity="sha512-8bHTC73gkZ7rZ7vpqUQThUDhqcNFyYi2xgDgPDHc+GXVGHXq+xPjynxIopALmOPqzo9JZj0k6OqqewdGO3EsrQ=="
-        crossorigin="anonymous" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4caf50;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4caf50;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .list {
+            list-style: none;
+            padding: 0;
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .income {
+            color: #4caf50;
+        }
+        .expense {
+            color: #f44336;
+        }
+        .total {
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+    </style>
 </head>
+<body>
+    <div class="container">
+        <h1>Budget Tracker</h1>
+        <form id="transaction-form">
+            <label for="description">Description:</label>
+            <input type="text" id="description" required>
 
-<body style="margin: 0px; padding: 0px;">
-    <div style="position:absolute; left: 50%; top: 50%; transform: translate(-50%, -60%)">
-        <div class="ui list">
-            <div class="item">
-                <div class="content">
-                    Weekly Expenses: <span data-bind="weeklyExpenses">_</span>
-                </div>
-            </div>
-            <div class="item">
-                <div class="content">
-                    Monthly Expenses: <span data-bind="monthlyExpenses">_</span>
-                </div>
-            </div>
-            <div class="item">
-                <div class="content">
-                    Annual Expenses: <span data-bind="annualExpenses">_</span>
-                </div>
-            </div>
-        </div>
-        <div class="ui statistic">
-            <div class="label">
-                Total Annual Expenses
-            </div>
-            <div class="value">
-                <span data-bind="totalAnnualExpenses">_</span>
-            </div>
-        </div>
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" required>
+
+            <button type="submit">Add Transaction</button>
+        </form>
+
+        <ul id="transaction-list" class="list"></ul>
+
+        <div class="total" id="total-balance">Total Balance: $0</div>
     </div>
-    <script src="./lib/questions.js"></script>
-    <script src="./index.js"></script>
-    <script src="./lib/render.js"></script>
-</body>
 
+    <script>
+        const form = document.getElementById('transaction-form');
+        const transactionList = document.getElementById('transaction-list');
+        const totalBalance = document.getElementById('total-balance');
+
+        let transactions = [];
+
+        function addTransaction(event) {
+            event.preventDefault();
+
+            const description = document.getElementById('description').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            const transaction = {
+                description,
+                amount,
+                id: Date.now()
+            };
+
+            transactions.push(transaction);
+            updateUI();
+
+            form.reset();
+        }
+
+        function deleteTransaction(id) {
+            transactions = transactions.filter(transaction => transaction.id !== id);
+            updateUI();
+        }
+
+        function updateUI() {
+            transactionList.innerHTML = '';
+
+            let total = 0;
+
+            transactions.forEach(transaction => {
+                const listItem = document.createElement('li');
+                listItem.className = `list-item ${transaction.amount >= 0 ? 'income' : 'expense'}`;
+                listItem.innerHTML = `
+                    ${transaction.description} 
+                    <span>$${transaction.amount.toFixed(2)}</span>
+                    <button onclick="deleteTransaction(${transaction.id})">x</button>
+                `;
+
+                transactionList.appendChild(listItem);
+                total += transaction.amount;
+            });
+
+            totalBalance.textContent = `Total Balance: $${total.toFixed(2)}`;
+        }
+
+        form.addEventListener('submit', addTransaction);
+    </script>
+</body>
 </html>
